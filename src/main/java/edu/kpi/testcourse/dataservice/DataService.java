@@ -1,19 +1,78 @@
 package edu.kpi.testcourse.dataservice;
 
-
 import java.util.List;
 
 /**
  * Data Service manages file storage actions (e.g storing user data).
  */
 public interface DataService {
-  void addUser(String email, String password);
 
-  String getUserPassword(String email);
+  /**
+   * Adds user to data storage.
+   *
+   * @param user a user to be add
+   * @return
+   *  {@code true} if user was added successfully;
+   *  {@code false} if user with the same email is already exists.
+   * @see User
+   */
+  boolean addUser(User user) throws IllegalArgumentException;
 
-  void addUrlAlias(UrlAlias urlAlias);
+  /**
+   * Returns a user with given {@code email}.
+   *
+   * @param email email of user to be found
+   * @return {@link User} with given email.
+   *     Returns {@code null} if there isn't a user with given {@code email}
+   * @see User
+   */
+  User getUser(String email);
 
+  /**
+   * Adds alias of url, created by certain user to data storage.
+   *
+   * @param urlAlias object to be added
+   * @return
+   *  {@code true} if object was added successfully;
+   *  {@code false} if record with the same alias is already exists.
+   * @see UrlAlias
+   */
+  boolean addUrlAlias(UrlAlias urlAlias);
+
+  /**
+   * Returns {@link UrlAlias} object that contains URL, corresponding to given alias and email
+   * of user that created it.
+   *
+   * @param alias key of object to be found
+   * @return {@link UrlAlias} object with given key.
+   *     Returns {@code null} if there isn't a record with given {@code alias}.
+   * @see UrlAlias
+   */
   UrlAlias getUrlAlias(String alias);
 
+  /**
+   * Deletes {@link UrlAlias} object for given {@code alias}.
+   *
+   * @param alias key of object to be deleted
+   * @return
+   *  {@code true} if object was deleted successfully;
+   *  {@code false} if there isn't a record with given {@code alias}.
+   * @see UrlAlias
+   */
+  boolean deleteUrlAlias(String alias);
+
+  /**
+   * Returns all aliases, created by user with given email.
+   *
+   * @param user email of user to be searched for
+   * @return list of aliases created by given user.
+   * @see UrlAlias
+   */
   List<UrlAlias> getUserAliases(String user);
+
+  /**
+   * Deletes all users and created url aliases.
+   * Note: created data directories will remain untouched.
+   */
+  void clear();
 }

@@ -18,7 +18,7 @@ class UrlServiceImpl implements UrlService {
   @Override
   public String getUrl(String alias) {
     var urlAlias = dataService.getUrlAlias(alias);
-    return urlAlias == null ? null : urlAlias.url();
+    return urlAlias == null ? null : urlAlias.getUrl();
   }
 
   @Override

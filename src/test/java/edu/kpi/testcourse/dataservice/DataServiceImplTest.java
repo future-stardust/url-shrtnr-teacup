@@ -14,7 +14,7 @@ class DataServiceImplTest {
     dataService.addUrlAlias(alias);
     var result = dataService.getUrlAlias("testKey");
 
-    assertThat(result.url()).isEqualTo("testValue");
+    assertThat(result.getUrl()).isEqualTo("testValue");
   }
 
   @Test
