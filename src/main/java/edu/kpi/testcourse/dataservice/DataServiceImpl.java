@@ -64,7 +64,7 @@ class DataServiceImpl implements DataService {
     if (allUrls != null) {
       for (File file : allUrls) {
         var urlAlias = readFromJsonFile(file, UrlAlias.class);
-        if (urlAlias.getUser() == user) {
+        if (urlAlias.getUser().equals(user)) {
           userUrls.add(urlAlias);
         }
       }
