@@ -3,6 +3,7 @@ package edu.kpi.testcourse.dataservice;
 import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -11,20 +12,23 @@ import javax.inject.Singleton;
 
 @Singleton
 class DataServiceImpl implements DataService {
+  private final String jsonFileExtension = ".json";
+  private final String userFileExtension = ".usr";
   private final String rootPath = "./.data";
-  private final String usersDirPath = rootPath + "/users";
-  private final String urlsDirPath = rootPath + "/urls";
 
   public DataServiceImpl() {
     createDirectory(rootPath);
-    createDirectory(usersDirPath);
-    createDirectory(urlsDirPath);
   }
 
   @Override
   public boolean addUser(User user) {
-    var file = getUserFile(user.getEmail());
-    return saveAsJsonFile(user, file);
+    var userDir = getUserDirectory(user.getEmail());
+    if (userDir.exists()) {
+      return false;
+    }
+    userDir.mkdir();
+    var userFile = getUserFile(user.getEmail());
+    return saveToFile(user, userFile);
   }
 
   @Override
@@ -35,38 +39,48 @@ class DataServiceImpl implements DataService {
 
   @Override
   public boolean addUrlAlias(UrlAlias urlAlias) {
-    var file = getAliasFile(urlAlias.getAlias());
-    return saveAsJsonFile(urlAlias, file);
+    var userDir = getUserDirectory(urlAlias.getUser());
+    if (!userDir.exists()) {
+      throw new IllegalArgumentException(
+        String.format("Cannot add alias, user '%s' was not created", urlAlias.getUser()));
+    }
+    var file = getAliasFile(urlAlias.getAlias(), urlAlias.getUser());
+    return saveToFile(urlAlias, file);
   }
 
   @Override
   public UrlAlias getUrlAlias(String alias) {
     var file = getAliasFile(alias);
+    if (file == null) {
+      return null;
+    }
     return readFromJsonFile(file, UrlAlias.class);
   }
 
   @Override
   public boolean deleteUrlAlias(String alias) {
     var file = getAliasFile(alias);
-    if (file.exists()) {
-      file.delete();
-      return true;
-    } else {
+    if (file == null) {
       return false;
     }
+    file.delete();
+    return true;
   }
 
   @Override
   public List<UrlAlias> getUserAliases(String user) {
-    var urlDir = new File(urlsDirPath);
-    File[] allUrls = urlDir.listFiles();
+    var userDir = getUserDirectory(user);
+    var userFiles = userDir.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.toLowerCase().endsWith(jsonFileExtension);
+      }
+    });
     var userUrls = new ArrayList<UrlAlias>();
-    if (allUrls != null) {
-      for (File file : allUrls) {
+    if (userFiles != null) {
+      for (File file : userFiles) {
         var urlAlias = readFromJsonFile(file, UrlAlias.class);
-        if (urlAlias.getUser().equals(user)) {
-          userUrls.add(urlAlias);
-        }
+        userUrls.add(urlAlias);
       }
     }
 
@@ -75,12 +89,17 @@ class DataServiceImpl implements DataService {
 
   @Override
   public void clear() {
-    clearDirectory(usersDirPath);
-    clearDirectory(urlsDirPath);
+    var rootDir = new File(rootPath);
+    var userDirs = rootDir.listFiles();
+    if (userDirs != null) {
+      for (var userDir : userDirs) {
+        clearDirectory(userDir);
+        userDir.delete();
+      }
+    }
   }
 
-  private void clearDirectory(String path) {
-    var dir = new File(path);
+  private void clearDirectory(File dir) {
     File[] allContents = dir.listFiles();
     if (allContents != null) {
       for (File file : allContents) {
@@ -96,7 +115,7 @@ class DataServiceImpl implements DataService {
     }
   }
 
-  private boolean saveAsJsonFile(Object src, File dest) {
+  private boolean saveToFile(Object src, File dest) {
     var g = new Gson();
     try {
       if (dest.createNewFile()) {
@@ -129,11 +148,29 @@ class DataServiceImpl implements DataService {
     return null;
   }
 
+  private File getUserDirectory(String email) {
+    return new File(String.join("/", rootPath, email));
+  }
+
   private File getUserFile(String email) {
-    return new File(String.format("%s/%s.json", usersDirPath, email));
+    return new File(String.join("/", rootPath, email, email + userFileExtension));
+  }
+
+  private File getAliasFile(String alias, String user) {
+    return new File(String.join("/", rootPath, user, alias + jsonFileExtension));
   }
 
   private File getAliasFile(String alias) {
-    return new File(String.format("%s/%s.json", urlsDirPath, alias));
+    var rootDir = new File(rootPath);
+    var users = rootDir.list();
+    if (users != null) {
+      for (var user : users) {
+        var aliasFile = getAliasFile(alias, user);
+        if (aliasFile.exists()) {
+          return aliasFile;
+        }
+      }
+    }
+    return null;
   }
 }

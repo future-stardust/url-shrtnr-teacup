@@ -35,9 +35,10 @@ public interface DataService {
    * @return
    *  {@code true} if object was added successfully;
    *  {@code false} if record with the same alias is already exists.
+   * @throws IllegalArgumentException if there is no user with email specified in {@code urlAlias}
    * @see UrlAlias
    */
-  boolean addUrlAlias(UrlAlias urlAlias);
+  boolean addUrlAlias(UrlAlias urlAlias) throws IllegalArgumentException;
 
   /**
    * Returns {@link UrlAlias} object that contains URL, corresponding to given alias and email
@@ -72,7 +73,6 @@ public interface DataService {
 
   /**
    * Deletes all users and created url aliases.
-   * Note: created data directories will remain untouched.
    */
   void clear();
 }
