@@ -60,9 +60,9 @@ class DataServiceImpl implements DataService {
   }
 
   @Override
-  public boolean deleteUrlAlias(String alias) {
-    var file = getAliasFile(alias);
-    if (file == null) {
+  public boolean deleteUrlAlias(String alias, String user) {
+    var file = getAliasFile(alias, user);
+    if (!file.exists()) {
       return false;
     }
     file.delete();

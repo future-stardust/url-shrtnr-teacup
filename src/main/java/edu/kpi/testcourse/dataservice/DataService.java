@@ -57,12 +57,14 @@ public interface DataService {
    * Deletes {@link UrlAlias} object for given {@code alias}.
    *
    * @param alias key of object to be deleted
+   * @param user email of user that tries to delete this {@code alias}
    * @return
    *  {@code true} if object was deleted successfully;
-   *  {@code false} if there isn't a record with given {@code alias}.
+   *  {@code false} if there isn't a record with given {@code alias}
+   *     created by specified {@code user}.
    * @see UrlAlias
    */
-  boolean deleteUrlAlias(String alias);
+  boolean deleteUrlAlias(String alias, String user);
 
   /**
    * Returns all aliases, created by user with given username.

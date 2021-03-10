@@ -48,14 +48,22 @@ public class UrlAliasTests extends DataServiceImplTest {
   @Test
   void deleteAliasReturnsTrue() {
     dataService.addUrlAlias(testUrlAlias);
-    var result = dataService.deleteUrlAlias(testUrlAlias.getAlias());
+    var result = dataService.deleteUrlAlias(testUrlAlias.getAlias(), testUser.getEmail());
 
     assertThat(result).isTrue();
   }
 
   @Test
   void deleteAliasIfAliasNotFound() {
-    var result = dataService.deleteUrlAlias(testUrlAlias.getAlias());
+    var result = dataService.deleteUrlAlias(testUrlAlias.getAlias(), testUser.getEmail());
+
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  void deleteAliasIfWrongUser() {
+    dataService.addUrlAlias(testUrlAlias);
+    var result = dataService.deleteUrlAlias(testUrlAlias.getAlias(), "wrongEmail");
 
     assertThat(result).isFalse();
   }
@@ -63,7 +71,7 @@ public class UrlAliasTests extends DataServiceImplTest {
   @Test
   void deleteAlias() {
     dataService.addUrlAlias(testUrlAlias);
-    dataService.deleteUrlAlias(testUrlAlias.getAlias());
+    dataService.deleteUrlAlias(testUrlAlias.getAlias(), testUser.getEmail());
     var result = dataService.getUrlAlias(testUrlAlias.getAlias());
 
     assertThat(result).isNull();
