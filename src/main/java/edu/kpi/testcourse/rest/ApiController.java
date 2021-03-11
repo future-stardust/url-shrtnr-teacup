@@ -54,11 +54,11 @@ public class ApiController {
     String passwordHash = null;
     try {
       passwordHash = PasswordHash.createHash(password);
-    } catch (NoSuchAlgorithmException e) {
-      HttpResponse.serverError("");
-    } catch (InvalidKeySpecException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       e.printStackTrace();
+      return HttpResponse.serverError("Server error!");
     }
+
     User newUser = new User(username, passwordHash);
     dataService.addUser(newUser);
 
