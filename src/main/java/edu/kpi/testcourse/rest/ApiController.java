@@ -7,6 +7,7 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Delete;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
@@ -49,12 +50,17 @@ public class ApiController {
    * @return generated or passed alias
    */
   @Post(value = "/urls/shorten")
-  public String addUrl(String url, Optional<String> alias) {
+  public HttpResponse<String> addUrl(String url, Optional<String> alias) {
     if (alias.isEmpty()) {
-      return urlService.addUrl(url, defaultUser);
+      try {
+        return HttpResponse.ok(urlService.addUrl(url, defaultUser));
+      } catch (IOException e) {
+        e.printStackTrace();
+        return HttpResponse.serverError();
+      }
     }
     urlService.addUrl(alias.get(), url, defaultUser);
-    return alias.get();
+    return HttpResponse.ok(alias.get());
   }
 
   @Get(value = "/urls")
