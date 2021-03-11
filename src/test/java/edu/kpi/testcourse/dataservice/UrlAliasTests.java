@@ -72,17 +72,17 @@ public class UrlAliasTests extends DataServiceImplTest {
   @Test
   void getUserAliases() {
     var user2 = "user2";
-    dataService.addUser(new User(testUser.getEmail(), ""));
+    dataService.addUser(new User(testUser.getUsername(), ""));
     dataService.addUser(new User(user2, ""));
 
     var testUserAliases = Arrays.asList("alias1", "alias2", "alias3");
     for (var alias: testUserAliases) {
-      dataService.addUrlAlias(new UrlAlias(alias, "url", testUser.getEmail()));
+      dataService.addUrlAlias(new UrlAlias(alias, "url", testUser.getUsername()));
     }
     dataService.addUrlAlias(new UrlAlias("alias4", "url", user2));
     dataService.addUrlAlias(new UrlAlias("alias5", "url", user2));
 
-    var testUserUrlAliases = dataService.getUserAliases(testUser.getEmail());
+    var testUserUrlAliases = dataService.getUserAliases(testUser.getUsername());
     assertThat(testUserUrlAliases.size()).isEqualTo(3);
     assertThat(testUserUrlAliases.stream().map(UrlAlias::getAlias)
       .collect(Collectors.toList()).containsAll(testUserAliases)).isTrue();

@@ -1,6 +1,5 @@
-package edu.kpi.testcourse.rest;
+package edu.kpi.testcourse.auth;
 
-import edu.kpi.testcourse.auth.PasswordHash;
 import edu.kpi.testcourse.dataservice.DataService;
 import edu.kpi.testcourse.dataservice.User;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -37,16 +36,18 @@ public class AuthenticationProviderUserPassword implements AuthenticationProvide
       @Nullable HttpRequest<?> httpRequest,
       AuthenticationRequest<?, ?> authenticationRequest
   ) {
-    User user = dataService.getUser((String) authenticationRequest.getIdentity());
+    String username = (String) authenticationRequest.getIdentity();
+    User user = dataService.getUser((username));
 
     return Flowable.create(emitter -> {
       if (user != null && PasswordHash.validatePassword((String) authenticationRequest.getSecret(),
             user.getPasswordHash())) {
-        emitter.onNext(new UserDetails((String) authenticationRequest.getIdentity(),
-            new ArrayList<>()));
+        emitter.onNext(new UserDetails(username, new ArrayList<>()));
         emitter.onComplete();
       } else {
-        emitter.onError(new AuthenticationException(new AuthenticationFailed("No user found!")));
+        emitter.onError(new AuthenticationException(
+            new AuthenticationFailed("Wrong username or password!"))
+        );
       }
     }, BackpressureStrategy.ERROR);
   }

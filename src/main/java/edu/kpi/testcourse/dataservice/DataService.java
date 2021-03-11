@@ -14,20 +14,20 @@ public interface DataService {
    * @param user a user to be add
    * @return
    *  {@code true} if user was added successfully;
-   *  {@code false} if user with the same email is already exists.
+   *  {@code false} if user with the same username is already exists.
    * @see User
    */
   boolean addUser(User user) throws IllegalArgumentException;
 
   /**
-   * Returns a user with given {@code email}.
+   * Returns a user with given {@code username}.
    *
-   * @param email email of user to be found
-   * @return {@link User} with given email.
-   *     Returns {@code null} if there isn't a user with given {@code email}
+   * @param username username of user to be found
+   * @return {@link User} with given username.
+   *     Returns {@code null} if there isn't a user with given {@code username}
    * @see User
    */
-  User getUser(String email);
+  User getUser(String username);
 
   /**
    * Adds alias of url, created by certain user to data storage.
@@ -36,13 +36,14 @@ public interface DataService {
    * @return
    *  {@code true} if object was added successfully;
    *  {@code false} if record with the same alias is already exists.
-   * @throws IllegalArgumentException if there is no user with email specified in {@code urlAlias}
+   * @throws IllegalArgumentException if there is no user with username
+   *      specified in {@code urlAlias}
    * @see UrlAlias
    */
   boolean addUrlAlias(UrlAlias urlAlias) throws IllegalArgumentException;
 
   /**
-   * Returns {@link UrlAlias} object that contains URL, corresponding to given alias and email
+   * Returns {@link UrlAlias} object that contains URL, corresponding to given alias and username
    * of user that created it.
    *
    * @param alias key of object to be found
@@ -64,9 +65,9 @@ public interface DataService {
   boolean deleteUrlAlias(String alias);
 
   /**
-   * Returns all aliases, created by user with given email.
+   * Returns all aliases, created by user with given username.
    *
-   * @param user email of user to be searched for
+   * @param user username of user to be searched for
    * @return list of aliases created by given user.
    * @see UrlAlias
    */

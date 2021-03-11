@@ -23,18 +23,18 @@ class DataServiceImpl implements DataService {
 
   @Override
   public boolean addUser(User user) {
-    var userDir = getUserDirectory(user.getEmail());
+    var userDir = getUserDirectory(user.getUsername());
     if (userDir.exists()) {
       return false;
     }
     userDir.mkdir();
-    var userFile = getUserFile(user.getEmail());
+    var userFile = getUserFile(user.getUsername());
     return saveToFile(user, userFile);
   }
 
   @Override
-  public User getUser(String email) {
-    var file = getUserFile(email);
+  public User getUser(String username) {
+    var file = getUserFile(username);
     return readFromJsonFile(file, User.class);
   }
 
@@ -165,12 +165,12 @@ class DataServiceImpl implements DataService {
     return null;
   }
 
-  private File getUserDirectory(String email) {
-    return new File(String.join("/", rootPath, email));
+  private File getUserDirectory(String username) {
+    return new File(String.join("/", rootPath, username));
   }
 
-  private File getUserFile(String email) {
-    return new File(String.join("/", rootPath, email, email + userFileExtension));
+  private File getUserFile(String username) {
+    return new File(String.join("/", rootPath, username, username + userFileExtension));
   }
 
   private File getAliasFile(String alias, String user) {

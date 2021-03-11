@@ -11,14 +11,14 @@ class DataServiceImplTest {
 
   protected DataService dataService = new DataServiceImpl();
 
-  protected final User testUser = new User("testEmail", "testPassword");
-  protected final UrlAlias testUrlAlias = new UrlAlias("testAlias", "testUrl", testUser.getEmail());
+  protected final User testUser = new User("testUsername", "testPassword");
+  protected final UrlAlias testUrlAlias = new UrlAlias("testAlias", "testUrl", testUser.getUsername());
 
   @Test
   void testClear() {
     dataService.addUser(testUser);
     dataService.clear();
-    var result = dataService.getUser(testUser.getEmail());
+    var result = dataService.getUser(testUser.getUsername());
 
     assertThat(result).isEqualTo(null);
   }

@@ -10,7 +10,7 @@ import java.text.ParseException;
 /**
  * Static class with useful methods for work with cookies.
  */
-public class JwtGetInformation {
+public class JwtHelper {
   public String getUsernameFromToken(String token) throws ParseException {
     JWT jwtToken = JWTParser.parse(token);
     return (String) new JwtClaimsSetAdapter(jwtToken.getJWTClaimsSet()).get(JwtClaims.SUBJECT);

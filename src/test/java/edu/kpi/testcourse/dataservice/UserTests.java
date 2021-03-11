@@ -23,14 +23,14 @@ public class UserTests extends DataServiceImplTest{
   @Test
   void getUser() {
     dataService.addUser(testUser);
-    var result = dataService.getUser(testUser.getEmail());
+    var result = dataService.getUser(testUser.getUsername());
 
     assertThat(result.getPasswordHash()).isEqualTo(testUser.getPasswordHash());
   }
 
   @Test
   void getUserIfUserNotFound() {
-    var result = dataService.getUser("wrongEmail");
+    var result = dataService.getUser("wrongUsername");
 
     assertThat(result).isNull();
   }

@@ -41,19 +41,25 @@ public class ApiController {
   /**
    * Creates new user.
    *
-   * @param email user email used as unique identifier
+   * @param username user username used as unique identifier
    * @param password user password
    * @return HttpResponse 200 OK or 422 with error message
    */
   @Secured(SecurityRule.IS_ANONYMOUS)
   @Post(value = "/users/signup")
-  public HttpResponse<String> signUp(String email, String password)
-      throws InvalidKeySpecException, NoSuchAlgorithmException {
-    if (dataService.getUser(email) != null) {
+  public HttpResponse<String> signUp(String username, String password) {
+    if (dataService.getUser(username) != null) {
       return HttpResponse.unprocessableEntity().body("User already exists!");
     }
-    String passwordHash = PasswordHash.createHash(password);
-    User newUser = new User(email, passwordHash);
+    String passwordHash = null;
+    try {
+      passwordHash = PasswordHash.createHash(password);
+    } catch (NoSuchAlgorithmException e) {
+      HttpResponse.serverError("");
+    } catch (InvalidKeySpecException e) {
+      e.printStackTrace();
+    }
+    User newUser = new User(username, passwordHash);
     dataService.addUser(newUser);
 
     return HttpResponse.ok();
@@ -103,7 +109,7 @@ public class ApiController {
    *
    * @param alias alias of the URL
    */
-  @Secured(SecurityRule.IS_AUTHENTICATED)
+  @Secured(SecurityRule.IS_ANONYMOUS)
   @Get(value = "/r/{alias}")
   public HttpResponse<String> redirect(String alias) {
     var url = urlService.getUrl(alias);
