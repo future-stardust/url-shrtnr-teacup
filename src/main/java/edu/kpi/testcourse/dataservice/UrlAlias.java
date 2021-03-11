@@ -9,6 +9,8 @@ package edu.kpi.testcourse.dataservice;
  *  <p>user - username of the user, that created this alias</p>.
  */
 public class UrlAlias {
+  private final int defaultId = -1;
+
   private int id;
   private String alias;
   private String url;
@@ -38,10 +40,14 @@ public class UrlAlias {
    * @param user username of user that created this alias
    */
   public UrlAlias(String alias, String url, String user) {
-    this.id = -1;
+    this.id = defaultId;
     this.alias = alias;
     this.url = url;
     this.user = user;
+  }
+
+  public boolean aliasIsGenerated() {
+    return id != defaultId;
   }
 
   public int getId() {

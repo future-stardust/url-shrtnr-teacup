@@ -3,7 +3,6 @@ package edu.kpi.testcourse.dataservice;
 import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ class DataServiceImpl implements DataService {
   private final String jsonFileExtension = ".json";
   private final String userFileExtension = ".usr";
   private final String rootPath = "./.data";
-  private final File numberFile = new File(rootPath + "/counter.txt");
+  private final File idsFile = new File(rootPath + "/ids" + jsonFileExtension);
 
   public DataServiceImpl() {
     createDirectory(rootPath);
@@ -29,7 +28,7 @@ class DataServiceImpl implements DataService {
     }
     userDir.mkdir();
     var userFile = getUserFile(user.getUsername());
-    return saveToFile(user, userFile);
+    return saveToNewFile(user, userFile);
   }
 
   @Override
@@ -47,7 +46,7 @@ class DataServiceImpl implements DataService {
       userDir.mkdir();
     }
     var file = getAliasFile(urlAlias.getAlias(), urlAlias.getUser());
-    return saveToFile(urlAlias, file);
+    return saveToNewFile(urlAlias, file);
   }
 
   @Override
@@ -65,6 +64,16 @@ class DataServiceImpl implements DataService {
     if (file == null) {
       return false;
     }
+    var urlAlias = readFromJsonFile(file, UrlAlias.class);
+    if (urlAlias.aliasIsGenerated()) {
+      try {
+        var idHelper = getIdHelper();
+        idHelper.addAvailable(urlAlias.getId());
+        writeToFile(idHelper, idsFile);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
     file.delete();
     return true;
   }
@@ -72,12 +81,8 @@ class DataServiceImpl implements DataService {
   @Override
   public List<UrlAlias> getUserAliases(String user) {
     var userDir = getUserDirectory(user);
-    var userFiles = userDir.listFiles(new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return name.toLowerCase().endsWith(jsonFileExtension);
-      }
-    });
+    var userFiles = userDir.listFiles(
+        (dir, name) -> name.toLowerCase().endsWith(jsonFileExtension));
     var userUrls = new ArrayList<UrlAlias>();
     if (userFiles != null) {
       for (File file : userFiles) {
@@ -99,21 +104,15 @@ class DataServiceImpl implements DataService {
         userDir.delete();
       }
     }
-    numberFile.delete();
+    idsFile.delete();
   }
 
   @Override
   public int getNextId() throws IOException {
-    var currentNumber = 1;
-    if (!numberFile.createNewFile()) {
-      var str = new String(Files.readAllBytes(numberFile.toPath()));
-      currentNumber = Integer.parseInt(str);
-    }
-    var writer = new FileWriter(numberFile);
-    writer.write(String.valueOf(currentNumber + 1));
-    writer.flush();
-    writer.close();
-    return currentNumber;
+    var idHelper = getIdHelper();
+    var result  = idHelper.getNextIdAndUpdate();
+    writeToFile(idHelper, idsFile);
+    return result;
   }
 
   private void clearDirectory(File dir) {
@@ -132,14 +131,10 @@ class DataServiceImpl implements DataService {
     }
   }
 
-  private boolean saveToFile(Object src, File dest) {
-    var g = new Gson();
+  private boolean saveToNewFile(Object src, File dest) {
     try {
       if (dest.createNewFile()) {
-        var writer = new FileWriter(dest);
-        writer.write(g.toJson(src));
-        writer.flush();
-        writer.close();
+        writeToFile(src, dest);
         return true;
       } else {
         return false;
@@ -149,6 +144,14 @@ class DataServiceImpl implements DataService {
     }
 
     return false;
+  }
+
+  private void writeToFile(Object src, File dest) throws IOException {
+    var g = new Gson();
+    var writer = new FileWriter(dest);
+    writer.write(g.toJson(src));
+    writer.flush();
+    writer.close();
   }
 
   public <T> T readFromJsonFile(File src, Class<T> classOfT) {
@@ -163,6 +166,16 @@ class DataServiceImpl implements DataService {
     }
 
     return null;
+  }
+
+  private IdHelper getIdHelper() throws IOException {
+    if (idsFile.createNewFile()) {
+      var idHelper = new IdHelper(new ArrayList<>(), 1);
+      writeToFile(idHelper, idsFile);
+      return idHelper;
+    } else {
+      return readFromJsonFile(idsFile, IdHelper.class);
+    }
   }
 
   private File getUserDirectory(String username) {
@@ -189,5 +202,27 @@ class DataServiceImpl implements DataService {
       }
     }
     return null;
+  }
+
+  private class IdHelper {
+    private List<Integer> availableIds;
+    private Integer nextId;
+
+    public IdHelper(List<Integer> availableIds, Integer nextId) {
+      this.availableIds = availableIds;
+      this.nextId = nextId;
+    }
+
+    public void addAvailable(Integer id) {
+      availableIds.add(id);
+    }
+
+    public Integer getNextIdAndUpdate() {
+      if (availableIds.isEmpty()) {
+        return nextId++;
+      } else {
+        return availableIds.remove(0);
+      }
+    }
   }
 }
