@@ -1,5 +1,8 @@
 package edu.kpi.testcourse.rest;
 
+import edu.kpi.testcourse.auth.PasswordHash;
+import edu.kpi.testcourse.dataservice.DataService;
+import edu.kpi.testcourse.dataservice.User;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.authentication.AuthenticationException;
@@ -11,6 +14,7 @@ import io.micronaut.security.authentication.UserDetails;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import java.util.ArrayList;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.reactivestreams.Publisher;
 
@@ -21,21 +25,28 @@ import org.reactivestreams.Publisher;
 @Singleton
 public class AuthenticationProviderUserPassword implements AuthenticationProvider {
 
+  @Inject
+  private final DataService dataService;
+
+  public AuthenticationProviderUserPassword(DataService dataService) {
+    this.dataService = dataService;
+  }
+
   @Override
   public Publisher<AuthenticationResponse> authenticate(
       @Nullable HttpRequest<?> httpRequest,
       AuthenticationRequest<?, ?> authenticationRequest
   ) {
-    // TODO Here you need to implement an actual authentication (ensure that the user is registered
-    //  and password is OK)
+    String email = (String) authenticationRequest.getIdentity();
+    String password = (String) authenticationRequest.getSecret();
+    User user = dataService.getUser(email);
+
     return Flowable.create(emitter -> {
-      if (authenticationRequest.getIdentity().equals("sherlock")
-          && authenticationRequest.getSecret().equals("password")) {
-        emitter
-          .onNext(new UserDetails((String) authenticationRequest.getIdentity(), new ArrayList<>()));
+      if (user != null && PasswordHash.validatePassword(password, user.getPasswordHash())) {
+        emitter.onNext(new UserDetails(email, new ArrayList<>()));
         emitter.onComplete();
       } else {
-        emitter.onError(new AuthenticationException(new AuthenticationFailed()));
+        emitter.onError(new AuthenticationException(new AuthenticationFailed("No user found!")));
       }
     }, BackpressureStrategy.ERROR);
   }

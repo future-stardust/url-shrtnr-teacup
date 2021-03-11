@@ -1,5 +1,8 @@
 package edu.kpi.testcourse.rest;
 
+import edu.kpi.testcourse.auth.PasswordHash;
+import edu.kpi.testcourse.dataservice.DataService;
+import edu.kpi.testcourse.dataservice.User;
 import edu.kpi.testcourse.urlservice.UrlService;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -7,9 +10,13 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Delete;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -23,21 +30,31 @@ public class ApiController {
   @Inject
   private final UrlService urlService;
 
-  public ApiController(UrlService urlService) {
+  @Inject
+  private final DataService dataService;
+
+  public ApiController(UrlService urlService, DataService dataService) {
     this.urlService = urlService;
+    this.dataService = dataService;
   }
 
+  @Secured(SecurityRule.IS_ANONYMOUS)
   @Post(value = "/users/signup")
-  public HttpResponse<String> signUp(String email, String password) {
-    return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED);
+  public HttpResponse<String> signUp(String email, String password)
+      throws InvalidKeySpecException, NoSuchAlgorithmException {
+    if (dataService.getUser(email) != null) {
+      return HttpResponse.unprocessableEntity();
+    }
+    String passwordHash = PasswordHash.createHash(password);
+    User newUser = new User(email, passwordHash);
+    dataService.addUser(newUser);
+
+    return HttpResponse.ok();
   }
 
-  @Post(value = "/users/signin")
-  public HttpResponse<String> signIp(String email, String password) {
-    return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED);
-  }
 
-  @Post(value = "/users/signup")
+  @Secured(SecurityRule.IS_AUTHENTICATED)
+  @Post(value = "/users/signout")
   public HttpResponse<String> signOut() {
     return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED);
   }
