@@ -15,6 +15,7 @@ class DataServiceImpl implements DataService {
   private final String jsonFileExtension = ".json";
   private final String userFileExtension = ".usr";
   private final String rootPath = "./.data";
+  private final File numberFile = new File(rootPath + "/counter.txt");
 
   public DataServiceImpl() {
     createDirectory(rootPath);
@@ -98,6 +99,21 @@ class DataServiceImpl implements DataService {
         userDir.delete();
       }
     }
+    numberFile.delete();
+  }
+
+  @Override
+  public int getNextId() throws IOException {
+    var currentNumber = 1;
+    if (!numberFile.createNewFile()) {
+      var str = new String(Files.readAllBytes(numberFile.toPath()));
+      currentNumber = Integer.parseInt(str);
+    }
+    var writer = new FileWriter(numberFile);
+    writer.write(String.valueOf(currentNumber + 1));
+    writer.flush();
+    writer.close();
+    return currentNumber;
   }
 
   private void clearDirectory(File dir) {

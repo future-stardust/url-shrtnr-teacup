@@ -1,5 +1,6 @@
 package edu.kpi.testcourse.dataservice;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -75,4 +76,12 @@ public interface DataService {
    * Deletes all users and created url aliases.
    */
   void clear();
+
+  /**
+   * Returns unique integer number on each call.
+   *
+   * @return unique integer number
+   * @throws IOException in case of errors with file writing/reading
+   */
+  int getNextId() throws IOException;
 }

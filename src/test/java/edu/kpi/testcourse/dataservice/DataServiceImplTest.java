@@ -3,6 +3,8 @@ package edu.kpi.testcourse.dataservice;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class DataServiceImplTest {
@@ -19,6 +21,17 @@ class DataServiceImplTest {
     var result = dataService.getUser(testUser.getEmail());
 
     assertThat(result).isEqualTo(null);
+  }
+
+  @Test
+  void getId() throws IOException {
+    var firstId = dataService.getNextId();
+    assertThat(firstId).isEqualTo(1);
+    var secondId = dataService.getNextId();
+    assertThat(secondId).isEqualTo(2);
+    dataService.clear();
+    var newId = dataService.getNextId();
+    assertThat(newId).isEqualTo(1);
   }
 
   @AfterEach

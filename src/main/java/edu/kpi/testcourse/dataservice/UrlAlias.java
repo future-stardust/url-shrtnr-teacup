@@ -7,6 +7,7 @@ package edu.kpi.testcourse.dataservice;
  *  <p>user - email of the user, that created this alias</p>.
  */
 public class UrlAlias {
+  private int id;
   private String alias;
   private String url;
   private String user;
@@ -18,10 +19,29 @@ public class UrlAlias {
    * @param url full url
    * @param user email of user that created this alias
    */
-  public UrlAlias(String alias, String url, String user) {
+  public UrlAlias(int id, String alias, String url, String user) {
+    this.id = id;
     this.alias = alias;
     this.url = url;
     this.user = user;
+  }
+
+  /**
+   * Class constructor with all fields filled.
+   *
+   * @param alias unique key, short name for the {@code url}
+   * @param url full url
+   * @param user email of user that created this alias
+   */
+  public UrlAlias(String alias, String url, String user) {
+    this.id = -1;
+    this.alias = alias;
+    this.url = url;
+    this.user = user;
+  }
+
+  public int getId() {
+    return id;
   }
 
   public String getAlias() {
