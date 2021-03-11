@@ -7,17 +7,20 @@ micronaut:
       enabled: true
   security:
     enabled: true
-    authentication: bearer
+    authentication: cookie
     endpoints:
       login:
         enabled: true
         path: /users/signin
+      logout:
+        enabled: true
+        path: /users/signout
     token:
       jwt:
         signatures:
           secret:
             generator:
               secret: supaDupaSecretThatNobodyWillKnow
-          generator:
-            access-token:
-              expiration: 300
+        generator:
+          access-token:
+            expiration: 120

@@ -38,25 +38,25 @@ public class ApiController {
     this.dataService = dataService;
   }
 
+  /**
+   * Creates new user.
+   *
+   * @param email user email used as unique identifier
+   * @param password user password
+   * @return HttpResponse 200 OK or 422 with error message
+   */
   @Secured(SecurityRule.IS_ANONYMOUS)
   @Post(value = "/users/signup")
   public HttpResponse<String> signUp(String email, String password)
       throws InvalidKeySpecException, NoSuchAlgorithmException {
     if (dataService.getUser(email) != null) {
-      return HttpResponse.unprocessableEntity();
+      return HttpResponse.unprocessableEntity().body("User already exists!");
     }
     String passwordHash = PasswordHash.createHash(password);
     User newUser = new User(email, passwordHash);
     dataService.addUser(newUser);
 
     return HttpResponse.ok();
-  }
-
-
-  @Secured(SecurityRule.IS_AUTHENTICATED)
-  @Post(value = "/users/signout")
-  public HttpResponse<String> signOut() {
-    return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED);
   }
 
   /**
@@ -66,6 +66,7 @@ public class ApiController {
    * @param alias optional, desired alias for {@code url}
    * @return generated or passed alias
    */
+  @Secured(SecurityRule.IS_AUTHENTICATED)
   @Post(value = "/urls/shorten")
   public HttpResponse<String> addUrl(String url, Optional<String> alias) {
     if (alias.isEmpty()) {
@@ -80,6 +81,7 @@ public class ApiController {
     return HttpResponse.ok(alias.get());
   }
 
+  @Secured(SecurityRule.IS_AUTHENTICATED)
   @Get(value = "/urls")
   public HttpResponse<String> getUserUrls() {
     return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED);
@@ -90,6 +92,7 @@ public class ApiController {
    *
    * @param alias alias to be deleted
    */
+  @Secured(SecurityRule.IS_AUTHENTICATED)
   @Delete(value = "urls/delete/{alias}")
   public HttpResponse<String> deleteAlias(String alias) {
     return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED);
@@ -100,6 +103,7 @@ public class ApiController {
    *
    * @param alias alias of the URL
    */
+  @Secured(SecurityRule.IS_AUTHENTICATED)
   @Get(value = "/r/{alias}")
   public HttpResponse<String> redirect(String alias) {
     var url = urlService.getUrl(alias);

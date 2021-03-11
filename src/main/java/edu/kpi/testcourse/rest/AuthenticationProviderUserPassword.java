@@ -37,13 +37,13 @@ public class AuthenticationProviderUserPassword implements AuthenticationProvide
       @Nullable HttpRequest<?> httpRequest,
       AuthenticationRequest<?, ?> authenticationRequest
   ) {
-    String email = (String) authenticationRequest.getIdentity();
-    String password = (String) authenticationRequest.getSecret();
-    User user = dataService.getUser(email);
+    User user = dataService.getUser((String) authenticationRequest.getIdentity());
 
     return Flowable.create(emitter -> {
-      if (user != null && PasswordHash.validatePassword(password, user.getPasswordHash())) {
-        emitter.onNext(new UserDetails(email, new ArrayList<>()));
+      if (user != null && PasswordHash.validatePassword((String) authenticationRequest.getSecret(),
+            user.getPasswordHash())) {
+        emitter.onNext(new UserDetails((String) authenticationRequest.getIdentity(),
+            new ArrayList<>()));
         emitter.onComplete();
       } else {
         emitter.onError(new AuthenticationException(new AuthenticationFailed("No user found!")));
