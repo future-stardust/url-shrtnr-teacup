@@ -42,9 +42,8 @@ class DataServiceImpl implements DataService {
   public boolean addUrlAlias(UrlAlias urlAlias) {
     var userDir = getUserDirectory(urlAlias.getUser());
     if (!userDir.exists()) {
-      //      throw new IllegalArgumentException(
-      //        String.format("Cannot add alias, user '%s' was not created", urlAlias.getUser()));
-      userDir.mkdir();
+      throw new IllegalArgumentException(
+        String.format("Cannot add alias, user '%s' was not created", urlAlias.getUser()));
     }
     var file = getAliasFile(urlAlias.getAlias(), urlAlias.getUser());
     return saveToFile(urlAlias, file);
