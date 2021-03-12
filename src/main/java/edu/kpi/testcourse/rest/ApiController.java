@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.spec.InvalidKeySpecException;
-import java.text.ParseException;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -82,36 +81,30 @@ public class ApiController {
    */
   @Secured(SecurityRule.IS_AUTHENTICATED)
   @Post(value = "/urls/shorten")
-  public HttpResponse<String> addUrl(HttpRequest<?> request, String url, Optional<String> alias) {
+  public HttpResponse<String> addUrl(Principal principal, String url, Optional<String> alias) {
+    var username = principal.getName();
     try {
-      var username = JwtHelper.getUsernameFromRequest(request);
-      try {
-        if (alias.isEmpty()) {
-          return HttpResponse.ok(urlService.addUrl(url, username));
-        }
-
-        if (urlService.isUserAliasValid(alias.get())) {
-          if (urlService.addUrl(alias.get(), url, username)) {
-            return HttpResponse.ok(alias.get());
-          } else {
-            return HttpResponse.status(HttpStatus.CONFLICT,
-              "Record with the same alias already exists");
-          }
-        } else {
-          return HttpResponse.status(HttpStatus.BAD_REQUEST,
-            "Alias should be an alphanumeric string");
-        }
-
-      } catch (IllegalArgumentException e) {
-        return HttpResponse.status(HttpStatus.NOT_ACCEPTABLE,
-          String.format("User %s doesn't exist, cannot create alias.", username));
-
-      } catch (IOException e) {
-        e.printStackTrace();
-        return HttpResponse.serverError();
+      if (alias.isEmpty()) {
+        return HttpResponse.ok(urlService.addUrl(url, username));
       }
 
-    } catch (ParseException e) {
+      if (urlService.isUserAliasValid(alias.get())) {
+        if (urlService.addUrl(alias.get(), url, username)) {
+          return HttpResponse.ok(alias.get());
+        } else {
+          return HttpResponse.status(HttpStatus.CONFLICT,
+            "Record with the same alias already exists");
+        }
+      } else {
+        return HttpResponse.status(HttpStatus.BAD_REQUEST,
+          "Alias should be an alphanumeric string");
+      }
+
+    } catch (IllegalArgumentException e) {
+      return HttpResponse.status(HttpStatus.NOT_ACCEPTABLE,
+        String.format("User %s doesn't exist, cannot create alias.", username));
+
+    } catch (IOException e) {
       e.printStackTrace();
       return HttpResponse.serverError();
     }
@@ -125,15 +118,10 @@ public class ApiController {
    */
   @Secured(SecurityRule.IS_AUTHENTICATED)
   @Get(value = "/urls", produces = MediaType.APPLICATION_JSON)
-  public HttpResponse<String> getUserUrls(HttpRequest<?> request) {
-    try {
-      var username = JwtHelper.getUsernameFromRequest(request);
-      var result = urlService.getUserAliases(username);
-      return HttpResponse.ok(Main.getGson().toJson(result));
-    } catch (ParseException e) {
-      e.printStackTrace();
-      return HttpResponse.serverError();
-    }
+  public HttpResponse<String> getUserUrls(Principal principal) {
+    var username = principal.getName();
+    var result = urlService.getUserAliases(username);
+    return HttpResponse.ok(Main.getGson().toJson(result));
   }
 
   /**
@@ -145,18 +133,13 @@ public class ApiController {
    */
   @Secured(SecurityRule.IS_AUTHENTICATED)
   @Delete(value = "urls/delete/{alias}")
-  public HttpResponse<String> deleteAlias(HttpRequest<?> request, String alias) {
-    try {
-      var username = JwtHelper.getUsernameFromRequest(request);
-      if (urlService.deleteAlias(alias, username)) {
-        return HttpResponse.ok();
-      } else {
-        return HttpResponse.badRequest(
-          String.format("Alias %s doesn't exist or wasn't created by current user.", alias));
-      }
-    } catch (ParseException e) {
-      e.printStackTrace();
-      return HttpResponse.serverError();
+  public HttpResponse<String> deleteAlias(Principal principal, String alias) {
+    var username = principal.getName();
+    if (urlService.deleteAlias(alias, username)) {
+      return HttpResponse.ok();
+    } else {
+      return HttpResponse.badRequest(
+        String.format("Alias %s doesn't exist or wasn't created by current user.", alias));
     }
   }
 
