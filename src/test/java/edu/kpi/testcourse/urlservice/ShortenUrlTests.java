@@ -35,9 +35,9 @@ public class ShortenUrlTests {
     var userAlias2 = "G_der3";
     var userAlias3 = "Good_3!";
 
-    assertTrue(urlService.checkUserAlias(userAlias1));
-    assertTrue(urlService.checkUserAlias(userAlias2));
-    assertFalse(urlService.checkUserAlias(userAlias3), "Should return false");
+    assertTrue(urlService.isUserAliasValid(userAlias1));
+    assertTrue(urlService.isUserAliasValid(userAlias2));
+    assertFalse(urlService.isUserAliasValid(userAlias3), "Should return false");
   }
 
 }

@@ -1,6 +1,8 @@
 package edu.kpi.testcourse.urlservice;
 
+import edu.kpi.testcourse.dataservice.UrlAlias;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Url Service manages url actions (e.g. shorten urls).
@@ -12,19 +14,23 @@ public interface UrlService {
    * Returns a url with given {@code alias}.
    *
    * @param alias alias of the url
-   * @return {@code UrlAlias} if alias passed the check and
+   * @return full url that was saved under this {@code alias}.
+   *     Returns {@code null} if there isn't a record with given {@code alias}.
    */
   String getUrl(String alias);
 
   /**
    * Adds url with user's alias to data storage.
-   * If alias has passed the check, the url is added with alias.
    *
    * @param alias alias of the url
    * @param url url to be added
    * @param user user adding the url
+   * @return
+   *  {@code true} if alias was added successfully;
+   *  {@code false} if record with the same alias is already exists.
+   * @throws IllegalArgumentException if there is no user with this username
    */
-  void addUrl(String alias, String url, String user);
+  boolean addUrl(String alias, String url, String user) throws IllegalArgumentException;
 
 
   /**
@@ -33,9 +39,32 @@ public interface UrlService {
    * @param url url to be added
    * @param user user adding the url
    * @return {@code String} short url token returned
-   * @throws IOException if getNextId() call failed.
+   * @throws IOException in case of errors with file writing/reading
+   * @throws IllegalArgumentException if there is no user with this username
    */
-  String addUrl(String url, String user) throws IOException;
+  String addUrl(String url, String user) throws IOException, IllegalArgumentException;
+
+  /**
+   * Deletes {@code alias}.
+   *
+   * @param alias key of object to be deleted
+   * @param user username of user that tries to delete this {@code alias}
+   * @return
+   *  {@code true} if object was deleted successfully;
+   *  {@code false} if there isn't a record with given {@code alias}
+   *     created by specified {@code user}.
+   * @see UrlAlias
+   */
+  boolean deleteAlias(String alias, String user);
+
+  /**
+   * Returns all aliases, created by user with given username.
+   *
+   * @param user username of user to be searched for
+   * @return list of aliases created by given user.
+   * @see AliasInfo
+   */
+  List<AliasInfo> getUserAliases(String user);
 
   /**
    * Shortens a given url via it's ID.
@@ -53,6 +82,6 @@ public interface UrlService {
    *  {@code true} if alias has passed the check;
    *  {@code false} if alias contains at least 1 forbidden char.
    */
-  boolean checkUserAlias(String alias);
+  boolean isUserAliasValid(String alias);
 
 }
