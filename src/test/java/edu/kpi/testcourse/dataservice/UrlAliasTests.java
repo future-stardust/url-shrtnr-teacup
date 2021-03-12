@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 
 public class UrlAliasTests extends DataServiceImplTest {
 
@@ -31,6 +31,13 @@ public class UrlAliasTests extends DataServiceImplTest {
   }
 
   @Test
+  void addAliasIfUserNotExists() {
+    var urlAlias = new UrlAlias("test", "test", "notExists");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+      .isThrownBy(() -> { dataService.addUrlAlias(urlAlias); });
+  }
+
+  @Test
   void getAlias() {
     dataService.addUrlAlias(testUrlAlias);
     var result = dataService.getUrlAlias(testUrlAlias.getAlias());
@@ -44,6 +51,7 @@ public class UrlAliasTests extends DataServiceImplTest {
 
     assertThat(result).isNull();
   }
+
 
   @Test
   void deleteAliasReturnsTrue() {

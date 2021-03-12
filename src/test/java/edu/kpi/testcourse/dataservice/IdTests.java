@@ -24,8 +24,9 @@ public class IdTests extends DataServiceImplTest {
     var generatedAlias = "test";
     var testId = 42;
     var urlAlias = new UrlAlias(testId, generatedAlias, "url", testUser.getUsername());
+    dataService.addUser(testUser);
     dataService.addUrlAlias(urlAlias);
-    dataService.deleteUrlAlias(generatedAlias);
+    dataService.deleteUrlAlias(generatedAlias, testUser.getUsername());
     var nextId = dataService.getNextId();
     assertThat(nextId).isEqualTo(testId);
   }
