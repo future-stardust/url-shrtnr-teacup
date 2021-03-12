@@ -6,7 +6,7 @@ package edu.kpi.testcourse.dataservice;
  *  <p>hash of the user password.</p>
  */
 public class User {
-  private String username;
+  private String email;
   private String passwordHash;
 
   /**
@@ -16,12 +16,12 @@ public class User {
    * @param passwordHash hash of the password
    */
   public User(String username, String passwordHash) {
-    this.username = username;
+    this.email = username;
     this.passwordHash = passwordHash;
   }
 
-  public String getUsername() {
-    return username;
+  public String getEmail() {
+    return email;
   }
 
   public String getPasswordHash() {

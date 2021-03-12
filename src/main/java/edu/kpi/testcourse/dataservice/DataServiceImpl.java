@@ -22,12 +22,12 @@ class DataServiceImpl implements DataService {
 
   @Override
   public boolean addUser(User user) {
-    var userDir = getUserDirectory(user.getUsername());
+    var userDir = getUserDirectory(user.getEmail());
     if (userDir.exists()) {
       return false;
     }
     userDir.mkdir();
-    var userFile = getUserFile(user.getUsername());
+    var userFile = getUserFile(user.getEmail());
     return saveToNewFile(user, userFile);
   }
 

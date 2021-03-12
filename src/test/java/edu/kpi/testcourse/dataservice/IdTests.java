@@ -23,10 +23,10 @@ public class IdTests extends DataServiceImplTest {
   void addIdAfterDeletingAlias() throws IOException {
     var generatedAlias = "test";
     var testId = 42;
-    var urlAlias = new UrlAlias(testId, generatedAlias, "url", testUser.getUsername());
+    var urlAlias = new UrlAlias(testId, generatedAlias, "url", testUser.getEmail());
     dataService.addUser(testUser);
     dataService.addUrlAlias(urlAlias);
-    dataService.deleteUrlAlias(generatedAlias, testUser.getUsername());
+    dataService.deleteUrlAlias(generatedAlias, testUser.getEmail());
     var nextId = dataService.getNextId();
     assertThat(nextId).isEqualTo(testId);
   }
