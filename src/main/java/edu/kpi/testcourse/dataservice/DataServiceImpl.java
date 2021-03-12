@@ -44,6 +44,12 @@ class DataServiceImpl implements DataService {
       throw new IllegalArgumentException(
         String.format("Cannot add alias, user '%s' was not created", urlAlias.getUser()));
     }
+
+    // if file with the same alias exists in the directory of any user
+    if (getAliasFile(urlAlias.getAlias()) != null) {
+      return false;
+    }
+    
     var file = getAliasFile(urlAlias.getAlias(), urlAlias.getUser());
     return saveToNewFile(urlAlias, file);
   }
