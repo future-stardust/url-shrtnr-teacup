@@ -11,16 +11,16 @@ import java.text.ParseException;
  * Static class with useful methods for work with cookies.
  */
 public class JwtHelper {
-  public String getUsernameFromToken(String token) throws ParseException {
+  private static String getUsernameFromToken(String token) throws ParseException {
     JWT jwtToken = JWTParser.parse(token);
     return (String) new JwtClaimsSetAdapter(jwtToken.getJWTClaimsSet()).get(JwtClaims.SUBJECT);
   }
 
-  public String getTokenFromRequest(HttpRequest<?> httpRequest) {
+  private static String getTokenFromRequest(HttpRequest<?> httpRequest) {
     return httpRequest.getCookies().get("JWT").getValue();
   }
 
-  public String getUsernameFromRequest(HttpRequest<?> httpRequest) throws ParseException {
+  public static String getUsernameFromRequest(HttpRequest<?> httpRequest) throws ParseException {
     return getUsernameFromToken(getTokenFromRequest(httpRequest));
   }
 }
