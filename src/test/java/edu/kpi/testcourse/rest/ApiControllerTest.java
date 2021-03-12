@@ -1,5 +1,6 @@
 package edu.kpi.testcourse.rest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kpi.testcourse.dataservice.DataService;
 import edu.kpi.testcourse.dataservice.User;
 import io.micronaut.http.HttpRequest;
@@ -35,7 +36,7 @@ public class ApiControllerTest {
 
   @Test
   void signUpNewUserStatus() {
-    HttpRequest<?> req = HttpRequest.POST("/users/signup", testUserCreds);
+    HttpRequest<?> req = HttpRequest.POST("/users/signup", new UserCreationRequest("testUsername", "testPassword"));
     int status = client.toBlocking().exchange(req).code();
 
     assertThat(status).isEqualTo(200);
@@ -43,7 +44,7 @@ public class ApiControllerTest {
 
   @Test
   void newUserInDatabaseAfterSignUp() {
-    HttpRequest<?> req = HttpRequest.POST("/users/signup", testUserCreds);
+    HttpRequest<?> req = HttpRequest.POST("/users/signup", new UserCreationRequest("testUsername", "testPassword"));
     client.toBlocking().exchange(req);
 
     User user = dataService.getUser(testUserCreds.getUsername());
@@ -54,7 +55,7 @@ public class ApiControllerTest {
   @Test
   void signUpExistingUserStatus() {
     String message = "";
-    HttpRequest<?> req = HttpRequest.POST("/users/signup", testUserCreds);
+    HttpRequest<?> req = HttpRequest.POST("/users/signup", new UserCreationRequest("testUsername", "testPassword"));
     client.toBlocking().exchange(req);
     try {
       client.toBlocking().exchange(req).code();
@@ -100,4 +101,6 @@ public class ApiControllerTest {
     }
     assertThat(message).contains("Unauthorized");
   }
+
+  record UserCreationRequest(@JsonProperty("email") String email, @JsonProperty("password") String password) {}
 }

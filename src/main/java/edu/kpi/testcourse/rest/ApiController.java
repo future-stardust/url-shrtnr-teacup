@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -41,14 +42,14 @@ public class ApiController {
   /**
    * Creates new user.
    *
-   * @param username user username used as unique identifier
+   * @param email user username used as unique identifier
    * @param password user password
    * @return HttpResponse 200 OK or 422 with error message
    */
   @Secured(SecurityRule.IS_ANONYMOUS)
   @Post(value = "/users/signup")
-  public HttpResponse<String> signUp(String username, String password) {
-    if (dataService.getUser(username) != null) {
+  public HttpResponse<String> signUp(String email, String password) {
+    if (dataService.getUser(email) != null) {
       return HttpResponse.unprocessableEntity().body("User already exists!");
     }
     String passwordHash = null;
@@ -59,7 +60,7 @@ public class ApiController {
       return HttpResponse.serverError("Server error!");
     }
 
-    User newUser = new User(username, passwordHash);
+    User newUser = new User(email, passwordHash);
     dataService.addUser(newUser);
 
     return HttpResponse.ok();
@@ -74,16 +75,17 @@ public class ApiController {
    */
   @Secured(SecurityRule.IS_AUTHENTICATED)
   @Post(value = "/urls/shorten")
-  public HttpResponse<String> addUrl(String url, Optional<String> alias) {
+  public HttpResponse<String> addUrl(String url, Optional<String> alias, Principal principal) {
+    String userName = principal.getName();
     if (alias.isEmpty()) {
       try {
-        return HttpResponse.ok(urlService.addUrl(url, defaultUser));
+        return HttpResponse.ok(urlService.addUrl(url, userName));
       } catch (IOException e) {
         e.printStackTrace();
         return HttpResponse.serverError();
       }
     }
-    urlService.addUrl(alias.get(), url, defaultUser);
+    urlService.addUrl(alias.get(), url, userName);
     return HttpResponse.ok(alias.get());
   }
 

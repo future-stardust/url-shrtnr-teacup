@@ -2,24 +2,12 @@ micronaut:
   application:
     name: test-course-template
   server:
-    port: 10001
+    port: 8080
     cors:
       enabled: true
   security:
     enabled: true
-    authentication: cookie
-    intercept-url-map:
-      - pattern: /users/signin
-        http-method: POST
-        access:
-          - isAnonymous()
-    endpoints:
-      login:
-        enabled: true
-        path: /users/signin
-      logout:
-        enabled: true
-        path: /users/signout
+    authentication: bearer
     token:
       jwt:
         signatures:
