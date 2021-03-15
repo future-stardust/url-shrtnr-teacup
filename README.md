@@ -11,6 +11,9 @@
 The [Tea design document] that
 describes architecture and implementation details of this project.
 
+## How to work with system
+Follow the guidance provided in this [link](/UserGuide.md).
+
 ### System structure
 
 After the third laboratory assignment groups will switch projects with one another. Because of this,
