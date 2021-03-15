@@ -63,7 +63,7 @@ public class ApiControllerTest {
       message = e.getMessage();
     }
 
-    assertThat(message).contains("Unprocessable Entity");
+    assertThat(message).contains("User already exists!");
   }
 
   @Test

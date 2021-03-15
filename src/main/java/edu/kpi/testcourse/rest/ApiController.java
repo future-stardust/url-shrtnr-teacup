@@ -50,7 +50,7 @@ public class ApiController {
    * @return HttpResponse 200 OK or 422 with error message
    */
   @Secured(SecurityRule.IS_ANONYMOUS)
-  @Post(value = "/users/signup")
+  @Post(value = "/users/signup", produces = MediaType.TEXT_PLAIN)
   public HttpResponse<String> signUp(String email, String password) {
     if (dataService.getUser(email) != null) {
       return HttpResponse.unprocessableEntity().body("User already exists!");
@@ -66,7 +66,7 @@ public class ApiController {
     User newUser = new User(email, passwordHash);
     dataService.addUser(newUser);
 
-    return HttpResponse.ok();
+    return HttpResponse.ok("User was successfully created.");
   }
 
   /**
@@ -80,17 +80,18 @@ public class ApiController {
    *  <p>409 (Conflict) if record with the same {@code alias} already exists</p>
    */
   @Secured(SecurityRule.IS_AUTHENTICATED)
-  @Post(value = "/urls/shorten")
+  @Post(value = "/urls/shorten", produces = MediaType.TEXT_PLAIN)
   public HttpResponse<String> addUrl(Principal principal, String url, Optional<String> alias) {
     var username = principal.getName();
     try {
       if (alias.isEmpty()) {
-        return HttpResponse.ok(urlService.addUrl(url, username));
+        var generatedAlias = urlService.addUrl(url, username);
+        return HttpResponse.ok(getShortenedUrl(generatedAlias));
       }
 
       if (urlService.isUserAliasValid(alias.get())) {
         if (urlService.addUrl(alias.get(), url, username)) {
-          return HttpResponse.ok(alias.get());
+          return HttpResponse.ok(getShortenedUrl(alias.get()));
         } else {
           return HttpResponse.status(HttpStatus.CONFLICT,
             "Record with the same alias already exists");
@@ -132,11 +133,11 @@ public class ApiController {
    *  <p>400 (Bad request) if {@code alias} doesn't exist or wasn't created by current user</p>
    */
   @Secured(SecurityRule.IS_AUTHENTICATED)
-  @Delete(value = "urls/delete/{alias}")
+  @Delete(value = "urls/delete/{alias}", produces = MediaType.TEXT_PLAIN)
   public HttpResponse<String> deleteAlias(Principal principal, String alias) {
     var username = principal.getName();
     if (urlService.deleteAlias(alias, username)) {
-      return HttpResponse.ok();
+      return HttpResponse.ok("Alias was successfully deleted.");
     } else {
       return HttpResponse.badRequest(
         String.format("Alias %s doesn't exist or wasn't created by current user.", alias));
@@ -165,5 +166,9 @@ public class ApiController {
       e.printStackTrace();
     }
     return HttpResponse.redirect(location);
+  }
+
+  private String getShortenedUrl(String alias) {
+    return "Shortened URL: http://localhost:8080/r/%s".formatted(alias);
   }
 }
