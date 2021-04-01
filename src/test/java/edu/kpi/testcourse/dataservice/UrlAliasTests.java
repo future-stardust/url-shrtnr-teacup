@@ -1,12 +1,18 @@
 package edu.kpi.testcourse.dataservice;
 
+import edu.kpi.testcourse.urlservice.UrlService;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static edu.kpi.testcourse.dataservice.UserTests.Generator;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.strings;
 
 public class UrlAliasTests extends DataServiceImplTest {
 
@@ -34,7 +40,7 @@ public class UrlAliasTests extends DataServiceImplTest {
   void addAliasIfUserNotExists() {
     var urlAlias = new UrlAlias("test", "test", "notExists");
     assertThatExceptionOfType(IllegalArgumentException.class)
-      .isThrownBy(() -> { dataService.addUrlAlias(urlAlias); });
+      .isThrownBy(() -> dataService.addUrlAlias(urlAlias));
   }
 
   @Test
@@ -103,4 +109,30 @@ public class UrlAliasTests extends DataServiceImplTest {
     assertThat(testUserUrlAliases.stream().map(UrlAlias::getAlias)
       .collect(Collectors.toList()).containsAll(testUserAliases)).isTrue();
   }
+
+
+/*Uncontested(Honchar)*/
+
+  @Test
+  void AddRandomUrlAliasinDB() {
+    var user1 = Generator();
+    dataService.addUser(new User(user1,Generator()));
+
+    var result = dataService.addUrlAlias(new UrlAlias(Generator(),Generator(),user1));
+    assertThat(result).isNotNull();
+  }
+
+  @Test
+  void AddRandomUrlAliasindbAndDelete() {
+
+    User testUser1 = new User(Generator(), Generator());
+    UrlAlias testUrlAlias1 = new UrlAlias(Generator(), Generator(), testUser1.getEmail());
+    dataService.deleteUrlAlias(testUrlAlias1.getAlias(), testUser1.getEmail());
+    var result = dataService.getUrlAlias(testUrlAlias1.getAlias());
+
+    assertThat(result).isNull();
+
+
+  }
+
 }

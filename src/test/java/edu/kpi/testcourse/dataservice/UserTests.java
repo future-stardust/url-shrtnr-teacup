@@ -11,6 +11,12 @@ import org.junit.jupiter.api.Test;
 
 import static io.netty.util.internal.StringUtil.length;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.strings;
+import java.util.Random;
+import java.util.List;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -36,11 +42,13 @@ public class UserTests extends DataServiceImplTest{
     var result = dataService.getUser(testUser.getEmail());
 
     assertThat(result.getPasswordHash()).isEqualTo(testUser.getPasswordHash());
+
   }
 
   @Test
   void getUserIfUserNotFound() {
     var result = dataService.getUser("wrongUsername");
+
 
     assertThat(result).isNull();
   }
