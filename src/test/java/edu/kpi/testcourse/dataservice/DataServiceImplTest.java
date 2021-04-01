@@ -21,7 +21,31 @@ class DataServiceImplTest {
     assertThat(result).isEqualTo(null);
   }
 
+  /**
+   * Tests written by the Uncontested group
+   */
 
+  @Test
+  void userDataSave() {
+    dataService.addUser(testUser);
+    var dataUsername = dataService.getUser(testUser.getEmail());
+    var dataPassword = dataService.getUser(testUser.getPasswordHash());
+    //System.out.println(testUser.getPasswordHash());
+    assertThat(dataUsername).isNotNull();
+    assertThat(dataPassword).isNull();
+  }
+
+  @Test
+  void aliasDataSave() {
+    dataService.addUser(testUser);
+    dataService.addUrlAlias(testUrlAlias);
+    var dataUrlAlias = dataService.getUrlAlias(testUrlAlias.getAlias());
+    var dataUrl = dataService.getUrlAlias(testUrlAlias.getUrl());
+
+    //System.out.println(dataUrl);
+
+    assertThat(dataUrlAlias).isNotNull();
+  }
 
 
   @AfterEach
