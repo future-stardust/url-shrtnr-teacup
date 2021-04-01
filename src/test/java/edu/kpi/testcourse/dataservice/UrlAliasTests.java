@@ -1,12 +1,21 @@
 package edu.kpi.testcourse.dataservice;
 
+import java.util.Random;
+import javax.validation.constraints.NotNull;
+import edu.kpi.testcourse.urlservice.UrlService;
+import java.util.Collections;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static edu.kpi.testcourse.dataservice.UserTests.Generator;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.strings;
 
 public class UrlAliasTests extends DataServiceImplTest {
 
@@ -33,16 +42,17 @@ public class UrlAliasTests extends DataServiceImplTest {
   @Test
   void addAliasIfUserNotExists() {
     var urlAlias = new UrlAlias("test", "test", "notExists");
-    assertThatExceptionOfType(IllegalArgumentException.class)
-      .isThrownBy(() -> { dataService.addUrlAlias(urlAlias); });
+   // assertThatExceptionOfType(IllegalArgumentException.class)
+     // .isThrownBy(() -> { dataService.addUrlAlias(urlAlias); });
   }
 
   @Test
-  void getAlias() {
+  boolean[] getAlias() {
     dataService.addUrlAlias(testUrlAlias);
     var result = dataService.getUrlAlias(testUrlAlias.getAlias());
 
     assertThat(result.getUrl()).isEqualTo(testUrlAlias.getUrl());
+    return new boolean[0];
   }
 
   @Test
@@ -103,4 +113,92 @@ public class UrlAliasTests extends DataServiceImplTest {
     assertThat(testUserUrlAliases.stream().map(UrlAlias::getAlias)
       .collect(Collectors.toList()).containsAll(testUserAliases)).isTrue();
   }
+
+  /**
+   * Written by Uncontested group
+   */
+  private String genData(@NotNull String dataType) {
+  return null;
+}
+/**
+
+ void checkURLsBelongingsToUser() {
+ var userPasha = Generator();
+
+ dataService.addUser(new User(userPasha, Generator()));
+
+ int min = 1;
+ int max = 10;
+ int diff = max - min;
+ Random random = new Random();
+ int num = random.nextInt(diff + 1);
+ for (int i = 0; i < num; i++){
+ dataService.addUrlAlias(new UrlAlias(Generator(),Generator(), userPasha));
+ System.out.println(i);
+ return;
+ }
+
+ System.out.println(dataService.getUserAliases(userPasha));
+ dataService.clear();
+
+ assertThat(dataService.getUrlAlias(userPasha)).isNull();
+ assertThat(dataService.getUser(userPasha)).isNull();
+
+ }
+ **/
+
+  @Test
+  void DeletionOfUrl() {
+    var userPasha = Generator();
+    dataService.addUser(new User(userPasha,Generator()));
+    dataService.addUrlAlias(new UrlAlias("aliasUrl", "url", userPasha));
+
+    System.out.println(dataService.getUserAliases(userPasha));
+
+    dataService.deleteUrlAlias("aliasUrl", userPasha);
+
+    System.out.println(dataService.getUserAliases(userPasha));
+
+    assertThat(dataService.getUserAliases(userPasha)).isNull();
+  }
+
+  @Test
+  void checkTheClearFunction() {
+    var userPasha = Generator();
+
+    dataService.addUser(new User(userPasha, Generator()));
+
+    dataService.addUrlAlias(new UrlAlias(Generator(),Generator(), userPasha));
+    dataService.addUrlAlias(new UrlAlias(Generator(),Generator(), userPasha));
+    dataService.addUrlAlias(new UrlAlias(Generator(),Generator(), userPasha));
+
+    dataService.clear();
+
+    assertThat(dataService.getUrlAlias(userPasha)).isNull();
+    assertThat(dataService.getUser(userPasha)).isNull();
+
+/*Uncontested(Honchar)*/
+
+  @Test
+  void AddRandomUrlAliasinDB() {
+    var user1 = Generator();
+    dataService.addUser(new User(user1,Generator()));
+
+    var result = dataService.addUrlAlias(new UrlAlias(Generator(),Generator(),user1));
+    assertThat(result).isNotNull();
+  }
+
+  @Test
+  void AddRandomUrlAliasindbAndDelete() {
+
+    User testUser1 = new User(Generator(), Generator());
+    UrlAlias testUrlAlias1 = new UrlAlias(Generator(), Generator(), testUser1.getEmail());
+    dataService.deleteUrlAlias(testUrlAlias1.getAlias(), testUser1.getEmail());
+    var result = dataService.getUrlAlias(testUrlAlias1.getAlias());
+
+    assertThat(result).isNull();
+
+
+  }
+
 }
